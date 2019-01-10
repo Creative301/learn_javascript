@@ -20,7 +20,7 @@ var budgetController = (function() {
 
 // BUDGET CONTROLLER
 var budgetController = (function() {
-  // some code later
+  
 })();
 
 
