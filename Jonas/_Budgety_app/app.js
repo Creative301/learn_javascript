@@ -83,7 +83,9 @@ var UIController = (function() {
     inputType: '.add__type',
     inputDescription: '.add__description',
     inputValue: '.add__value',
-    inputBtn: '.add__btn'
+    inputBtn: '.add__btn',
+    incomeContainer: '.income__list',
+    expensesContainer: '.expenses__list'
   }
 
   // return supaya bisa diakses oleh function yg lain di outer scope
@@ -98,27 +100,43 @@ var UIController = (function() {
       };
     },
     addListItem: function (obj, type) {
-      var html, newHTML;
+      var html, newHtml, element;
       // Create HTML string with placeholder text
       if (type === 'inc') {
+        element = DOMstrings.incomeContainer;
         html = '<div class="item clearfix" id="income-%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
       } else if (type === 'exp') {
+        element = DOMstrings.expensesContainer;
       html = '<div class="item clearfix" id="expense--%id%"><div class="item__description">%description%</div><div class="right clearfix"><div class="item__value">%value%</div><div class="item__percentage">21%</div><div class="item__delete"><button class="item__delete--btn"><i class="ion-ios-close-outline"></i></button></div></div></div>'
       }
 
       // Replace the placeholder text with some actual data
       // obj.id ambil dari budgetCtrl Expense
-      newHTML = html.replace('%id%', obj.id);
-      newHTML = newHTML.replace('%description%', obj.description);
-      newHTML = newHTML.replace('%value%', obj.value);
+      newHtml = html.replace('%id%', obj.id);
+      newHtml = newHtml.replace('%description%', obj.description);
+      newHtml = newHtml.replace('%value%', obj.value);
 
-      // Insert the HTML into the DOM
+      // Insert the HTML index.html ke dalam income__list tag atau expenses__list tag
       // developer.mozilla.org/en-US/docs/WEB/API/Element/InsertAdjacentHTML
+      document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+    },
 
+    clearFields: function () {
+      var fields, fieldsArr;
+    // querySelectorAll output is a list, not an array
+      fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
 
+      // Convert list to an array
+      fieldsArr = Array.prototype.slice.call(fields);
 
+      // Loop through Array, delete isinya setelah selesai add description
 
+      fieldsArr.forEach(function (current, index, array) {
+        current.value = "";
+      });
 
+      // Focus balik ke field pertama
+      fieldsArr[0].focus();
     },
     // Exposing DOMstrings object into the public
     getDOMstrings: function() {
@@ -171,15 +189,19 @@ var controller = (function(budgetCtrl, UICtrl) {
     newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
     // 3. Add the item to the UI
+    UICtrl.addListItem(newItem, input.type);
 
-    // 4. Calculate the budget
+    // 4. Clear the fields
+    UICtrl.clearFields();
 
-    // 5. Display the budget on the UI
+    // 5. Calculate the budget
+
+    // 6. Display the budget on the UI
   };
 
   return {
     init: function () {
-      // console.log('Aplication started');
+      console.log('Aplication started');
       setupEventListeners();
     }
   };
