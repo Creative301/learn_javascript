@@ -69,6 +69,13 @@ var budgetController = (function() {
       // return the new element
       return newItem;
     },
+    calculateBudget: function () {
+      // calculate total income and expenses
+      
+      // calculate the budget: income - expenses
+
+      // calculate the percentage of income that we spent
+    },
     testing: function () {
       console.log(data);
     }
@@ -78,7 +85,7 @@ var budgetController = (function() {
 
 // UI CONTROLLER
 var UIController = (function() {
-  // Create css class variables
+  // Create css class object
   var DOMstrings = {
     inputType: '.add__type',
     inputDescription: '.add__description',
@@ -90,13 +97,14 @@ var UIController = (function() {
 
   // return supaya bisa diakses oleh function yg lain di outer scope
   return {
+    // capture input data
     getInput: function() {
       // baca value yg ada di input tag
       // Return 3 values at the same time, return an object containing these 3 as properties
       return {
         type: document.querySelector(DOMstrings.inputType).value, // will be either inc or exp (dari select option value di index.html)
         description: document.querySelector(DOMstrings.inputDescription).value,
-        value: document.querySelector(DOMstrings.inputValue).value
+        value: parseFloat(document.querySelector(DOMstrings.inputValue).value)
       };
     },
     addListItem: function (obj, type) {
@@ -130,12 +138,11 @@ var UIController = (function() {
       fieldsArr = Array.prototype.slice.call(fields);
 
       // Loop through Array, delete isinya setelah selesai add description
-
       fieldsArr.forEach(function (current, index, array) {
         current.value = "";
       });
 
-      // Focus balik ke field pertama
+      // Cursor focus balik ke field pertama
       fieldsArr[0].focus();
     },
     // Exposing DOMstrings object into the public
@@ -177,6 +184,15 @@ var controller = (function(budgetCtrl, UICtrl) {
     });
   };
 
+ // Menghitung dan dan menampilkan income/expenses
+  var updateBudget = function () {
+    // 1. Calculate the budget
+
+    // 2. Return the budget
+
+    // 3. Display the budget on the UI
+  };
+  // Action when users hit the button
   var ctrlAddItem = function() {
     var input, newItem;
 
@@ -184,19 +200,20 @@ var controller = (function(budgetCtrl, UICtrl) {
     input = UICtrl.getInput();
     // console.log(input);
 
-    // 2. Add the item to the budget CONTROLLER
-    // addItem return an object
-    newItem = budgetCtrl.addItem(input.type, input.description, input.value);
+    if(input.description !== "" && !isNaN(input.value) && input.value > 0) {
+      // 2. Add the item to the budget CONTROLLER
+      // addItem return an object
+      newItem = budgetCtrl.addItem(input.type, input.description, input.value);
 
-    // 3. Add the item to the UI
-    UICtrl.addListItem(newItem, input.type);
+      // 3. Add the item to the UI
+      UICtrl.addListItem(newItem, input.type);
 
-    // 4. Clear the fields
-    UICtrl.clearFields();
+      // 4. Clear the fields
+      UICtrl.clearFields();
 
-    // 5. Calculate the budget
-
-    // 6. Display the budget on the UI
+      // 5. Calculate and update budget
+      updateBudget();
+    }
   };
 
   return {
