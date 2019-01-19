@@ -170,6 +170,11 @@ var UIController = (function() {
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
     },
 
+    deleteListItem: function() {
+      // Untuk delete element, kita harus move up to the parent, abis itu delete childnya
+
+    },
+
     clearFields: function () {
       var fields, fieldsArr;
     // querySelectorAll output is a list, not an array
