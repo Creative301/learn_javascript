@@ -24,13 +24,29 @@ var budgetController = (function() {
     this.id = id;
     this.description = description;
     this.value = value;
+    this.percentage = -1;
   };
+
+  // Menghitung persentase expenses
+  Expense.prototype.calculatePercentage = function (totalIncome) {
+    if(totalIncome > 0) {
+      this.percentage = Math.round((this.value / totalIncome) * 100);
+    } else {
+      this.percentage = -1;
+    }  
+  }; 
+
+  // return persentase expenses
+  Expense.prototype.getPercentage = function() {
+    return this.percentage;
+  }
 
   var Income = function (id, description, value) {
     this.id = id;
     this.description = description;
     this.value = value;
   };
+
   var calculateTotal = function (type) {
     var sum = 0;
     data.allItems[type].forEach(function (cur) {
@@ -85,6 +101,32 @@ var budgetController = (function() {
       // return the new element
       return newItem;
     },
+
+    // Delete item di array
+    deleteItem: function(type, id) {
+      var ids, index;
+
+      // id = 6
+      // data.allItems[type][id];
+      // ids = [1,2,4,6,8];
+      // index = 3
+
+      // map: method to loop over an array
+      // get the ID of all the array
+       ids = data.allItems[type].map(function(current) {
+        return current.id;
+       });
+
+       // Get the index of the id in the array
+       index = ids.indexOf(id);
+
+       // splice: method to remove elements from an array
+       // remove element jika indexnya ada
+       if (index !== -1) {
+         data.allItems[type].splice(index, 1);
+       }
+    },
+
     calculateBudget: function () {
       // calculate total income and expenses
       calculateTotal('exp');
@@ -103,6 +145,31 @@ var budgetController = (function() {
       }
 
     },
+
+    // Menghitung persentase expenses
+    calculatePercentages: function () {
+      /*
+      a=20
+      b=10
+      c=40
+      income=100
+      a=20/100=20%
+      b=10/100=10%
+      c=40/100=40%
+      */
+      data.allItems.exp.forEach(function (cur) {
+        cur.calculatePercentage(data.totals.inc); // calculatePercentage dari prototype Expense
+      });
+    },
+
+    // Get persentase expenses
+    getPercentages: function () {
+      var allPerc = data.allItems.exp.map(function(cur) {
+        return cur.getPercentage();
+      });
+      return allPerc;
+    },
+
     // make public
     getBudget: function () {
       return {
@@ -133,8 +200,40 @@ var UIController = (function() {
     incomeLabel: '.budget__income--value',
     expensesLabel: '.budget__expenses--value',
     percentageLabel: '.budget__expenses--percentage',
-    container: '.container'
-  }
+    container: '.container',
+    expensesPercLabel: '.item__percentage'
+  };
+
+  var formatNumber = function(num, type) {
+    /* 
+    + or - before number
+    exactlt 2 decimal points
+    comma separating the thousands
+
+    2310.4567 -> 2,310.46
+    2000 -> + 2,000.00
+    */
+    var numSplit, int, dec, type;
+
+    num = Math.abs(num);
+    // Set num jadi 2 desimal angka di belakang koma
+    num = num.toFixed(2);
+
+    // Split num jd desimal
+    numSplit = num.split('.');
+
+    // Add koma utk angka ribuan, pakai substr utk memilih angka awal
+    int = numSplit[0];
+    if (int.length > 3) {
+      // input 23510, output 23,510
+      int = int.substr(0, int.length -3) + ',' + int.substr(int.length - 3, 3);
+    }
+
+    dec = numSplit[1];
+
+    // Add tanda - atau + di depan angka dan tanta titik untuk desimal
+    return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+  };
 
   // return supaya bisa diakses oleh function yg lain di outer scope
   return {
@@ -163,16 +262,18 @@ var UIController = (function() {
       // obj.id ambil dari budgetCtrl Expense
       newHtml = html.replace('%id%', obj.id);
       newHtml = newHtml.replace('%description%', obj.description);
-      newHtml = newHtml.replace('%value%', obj.value);
+      newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
 
       // Insert the HTML index.html ke dalam income__list tag atau expenses__list tag
       // developer.mozilla.org/en-US/docs/WEB/API/Element/InsertAdjacentHTML
       document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
     },
 
-    deleteListItem: function() {
+    // Delete element from the UI
+    deleteListItem: function(selectorID) {
       // Untuk delete element, kita harus move up to the parent, abis itu delete childnya
-
+      var el = document.getElementById(selectorID);
+      el.parentNode.removeChild(el);
     },
 
     clearFields: function () {
@@ -191,10 +292,13 @@ var UIController = (function() {
       // Cursor focus balik ke field pertama
       fieldsArr[0].focus();
     },
+
     displayBudget: function (obj) {
-      document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-      document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
-      document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+      var type;
+      obj.budget > 0 ? type = 'inc' : type = 'exp';
+      document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
+      document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
+      document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
 
       // Setting dan menampilkan persentase (%)
       if (obj.percentage > 0) {
@@ -204,6 +308,28 @@ var UIController = (function() {
       }
 
     },
+
+    // Menampilkan persentase expenses di UI
+    displayPercentages: function(percentages) {
+      // Get the percentage using querySelectorAll will return node list
+      // gunakan foreach function to loop inside the node list
+      var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
+
+      var nodeListForEach = function(list, callback) {
+        for (var i = 0; i < list.length; i++) {
+          callback(list[i], i);
+        }
+      };
+
+      nodeListForEach(fields, function(current, index) {
+        if(percentages[index] > 0) {
+          current.textContent = percentages[index] + '%';
+        } else {
+          current.textContent = '---';
+        }       
+      });
+    },
+
     // Exposing DOMstrings object into the public
     getDOMstrings: function() {
       return DOMstrings;
@@ -260,6 +386,15 @@ var controller = (function(budgetCtrl, UICtrl) {
     UICtrl.displayBudget(budget);
   };
 
+  var updatePercentages = function() {
+    // 1. Calculate percentages
+    budgetCtrl.calculatePercentages();
+    // 2. Read percentages from the budget controller
+    var percentages = budgetCtrl.getPercentages();
+    // 3. Update the UI with the new percentages
+    UICtrl.displayPercentages(percentages);
+  };
+
   // Action buat add item
   var ctrlAddItem = function() {
     var input, newItem;
@@ -281,6 +416,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
       // 5. Calculate and update budget
       updateBudget();
+
+      // 6. Calculate and update percentages
+      updatePercentages();
     }
   };
 
@@ -289,17 +427,26 @@ var controller = (function(budgetCtrl, UICtrl) {
   var ctrlDeleteItem = function (event) {
     var itemID, splitID, type, ID;
     itemID = event.target.parentNode.parentNode.parentNode.parentNode.id;
-    // inc-1 -> ('inc', '1')
-    splitID = itemID.split('-');
 
-    // 1. Delete the item from the data structure
+    if (itemID) {
+      // inc-1 -> ('inc', '1')
+      splitID = itemID.split('-');
+      type = splitID[0];
+      // IDnya dalam bentuk string, maka di parseInt
+      ID = parseInt(splitID[1]);
 
+      // 1. Delete the item from the data structure
+      budgetCtrl.deleteItem(type, ID);
 
-    // 2. Delete the item from the UI
+      // 2. Delete the item from the UI
+      UICtrl.deleteListItem(itemID);
 
-    // 3. Update and show the new budget
+      // 3. Update and show the new budget
+      updateBudget();
 
-    
+      // 4. Calculate and update percentages
+      updatePercentages();
+    }
   };
 
   return {
