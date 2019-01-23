@@ -236,6 +236,13 @@ var UIController = (function() {
     return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
   };
 
+        // gunakan foreach function to loop inside the node list
+        var nodeListForEach = function(list, callback) {
+          for (var i = 0; i < list.length; i++) {
+            callback(list[i], i);
+          }
+        };
+
   // return supaya bisa diakses oleh function yg lain di outer scope
   return {
     // capture input data
@@ -313,14 +320,7 @@ var UIController = (function() {
     // Menampilkan persentase expenses di UI
     displayPercentages: function(percentages) {
       // Get the percentage using querySelectorAll will return node list
-      // gunakan foreach function to loop inside the node list
       var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
-
-      var nodeListForEach = function(list, callback) {
-        for (var i = 0; i < list.length; i++) {
-          callback(list[i], i);
-        }
-      };
 
       nodeListForEach(fields, function(current, index) {
         if(percentages[index] > 0) {
@@ -339,6 +339,20 @@ var UIController = (function() {
       month = now.getMonth();
       year = now.getFullYear();
       document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
+    },
+
+    // Display red outline for the expenses. qsa will return nodelist
+    changedType: function() {
+      var fields = document.querySelectorAll(
+        DOMstrings.inputType + ',' +
+        DOMstrings.inputDescription + ',' +
+        DOMstrings.inputValue
+      );
+
+      // loop inside the changed type 6.49
+      nodeListForEach(fields, function(cur) {
+        
+      })
     },
 
     // Exposing DOMstrings object into the public
@@ -383,6 +397,9 @@ var controller = (function(budgetCtrl, UICtrl) {
     // Listener to Delete data.
     // Target ke container class yng berisi data income dan expenses 
     document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+
+    // Improve UX, add red outline when the user select the expense button (-)
+    document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changeType);
   };
 
  // Menghitung dan dan menampilkan income/expenses
