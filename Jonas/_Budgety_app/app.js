@@ -236,12 +236,12 @@ var UIController = (function() {
     return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
   };
 
-        // gunakan foreach function to loop inside the node list
-        var nodeListForEach = function(list, callback) {
-          for (var i = 0; i < list.length; i++) {
-            callback(list[i], i);
-          }
-        };
+  // gunakan foreach function to loop inside the node list
+  var nodeListForEach = function(list, callback) {
+    for (var i = 0; i < list.length; i++) {
+      callback(list[i], i);
+    }
+  };
 
   // return supaya bisa diakses oleh function yg lain di outer scope
   return {
@@ -346,13 +346,13 @@ var UIController = (function() {
       var fields = document.querySelectorAll(
         DOMstrings.inputType + ',' +
         DOMstrings.inputDescription + ',' +
-        DOMstrings.inputValue
-      );
+        DOMstrings.inputValue);
 
       // loop inside the changed type 6.49
       nodeListForEach(fields, function(cur) {
-        
-      })
+        cur.classList.toggle('red-focus');
+      });
+      document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
     },
 
     // Exposing DOMstrings object into the public
