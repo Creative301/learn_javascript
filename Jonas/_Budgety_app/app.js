@@ -342,7 +342,7 @@ var UIController = (function() {
     },
 
     // Display red outline for the expenses. qsa will return nodelist
-    changedType: function() {
+/*     changedType: function() {
       var fields = document.querySelectorAll(
         DOMstrings.inputType + ',' +
         DOMstrings.inputDescription + ',' +
@@ -353,8 +353,22 @@ var UIController = (function() {
         cur.classList.toggle('red-focus');
       });
       document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
-    },
+    }, */
 
+    changedType: function() {
+            
+      var fields = document.querySelectorAll(
+          DOMstrings.inputType + ',' +
+          DOMstrings.inputDescription + ',' +
+          DOMstrings.inputValue);
+      
+      nodeListForEach(fields, function(cur) {
+         cur.classList.toggle('red-focus'); 
+      });
+      
+      document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
+      
+  },
     // Exposing DOMstrings object into the public
     getDOMstrings: function() {
       return DOMstrings;
