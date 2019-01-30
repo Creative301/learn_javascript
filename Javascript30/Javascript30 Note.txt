@@ -1,2 +1,5 @@
 // Keycode:
 keycode.info
+
+// Nodelist
+Method cuma ada sedikit. Loop pake foreach
