@@ -1,0 +1,19 @@
+// wesbos
+https://twitter.com/wesbos
+https://wesbos.com/uses/
+https://github.com/wesbos/dotfiles/blob/master/vs-code-extensions-i-use.md
+
+// Keycode:
+keycode.info
+
+// Nodelist
+Method cuma ada sedikit. Loop pake foreach
+
+// Flexbox
+https://flexbox.io/
+
+// CSS Grid
+cssgrid.io
+
+// HSL
+http://mothereffinghsl.com/
